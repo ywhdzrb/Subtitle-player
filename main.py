@@ -1,5 +1,6 @@
 import json
 from tkinter import *
+from tkinter import messagebox
 
 DEBUG = None
 JSONPATH = ".\\tloos.json"
@@ -10,6 +11,8 @@ read_line = 0
 def logout(text):
     import time
     print(f"[{time.strftime('%H:%M:%S', time.localtime())}] {text}")
+    with open(".\\log.log", "a") as f:
+        f.write(f"[{time.strftime('%H:%M:%S', time.localtime())}] {text}\n")
 
 def exit():
     import sys
@@ -19,10 +22,7 @@ def exit():
         f.write(str(COUNTINI)+"\n")
         f.write(str(count)+"\n")
         f.write(str(read_line)+"\n")
-    sys.exit()
-
-        
-        
+    sys.exit()       
 
 class READ:
     def __init__(self) -> None:
@@ -56,7 +56,7 @@ class READ:
     
     def read_text(self):
         if type(self.data["root"][self.read_root_line]) == str:
-            return ["text", self.data["root"][self.read_root_line]]
+            return self.data["root"][self.read_root_line]
     
     def read_button(self):
         if type(self.data["root"][self.read_root_line]) == dict and "buuton" in self.data["root"][self.read_root_line]:
@@ -65,41 +65,88 @@ class READ:
     def read_input(self):
         if type(self.data["root"][self.read_root_line]) == dict and "input" in self.data["root"][self.read_root_line]:
             return self.data["root"][self.read_root_line]
-        
-    
+
     def read_run(self):
         if type(self.data["root"][self.read_root_line]) == dict and "run" in self.data["root"][self.read_root_line]:
-            return self.data["root"][self.read_root_line] 
+            return self.data["root"][self.read_root_line]
     
+    def read_count(self):
+        if type(self.data["root"][self.read_root_line]) == dict and "count" in self.data["root"][self.read_root_line]:
+            return self.data["root"][self.read_root_line]
+        
+class RUN_READ:
+    def __init__(self) -> None:
+        self.read = READ()
+        self.win = WIN()
     
-
+    def run_text(self):
+        global read_line
+        self.win.win_text(self.read.read_text())
+        logout(self.read.read_text())
+    
 
 class WIN:
     def __init__(self) -> None:
         self.win = Tk()
         self.win.title("subtitle player")
-        self.win.geometry("700x500")
+        self.win.geometry("350x200")
         self.win.resizable(False, False)
+        
+        self.button_up = Button(self.win, text="Up", command=lambda: self.win_button_up())
+        # 大小
+        self.button_up.pack(padx=10, pady=10, anchor="n")
+
+        self.button_down = Button(self.win, text="Down", command=lambda: self.win_button_down())
+        self.button_down.pack(padx=10, pady=10, anchor="sw")
+
+        self.data = READ().data
+
         logout("init...ok")
-        self.read = READ()
     
+    def win_button_up(self):
+        global read_line
+        logout("Up")
+        if not read_line == 0:
+            read_line -= 1
+            logout(read_line)
+        else:
+            messagebox.showinfo("提示", "已经是第一行了！")
+            logout("not UP")
+    
+    def win_button_down(self):
+        global read_line
+        logout("Down")
+        if not read_line == len(self.data["root"])-1:
+            read_line += 1
+            logout(read_line)
+        else:
+            messagebox.showinfo("提示", "已经是最后一行了！")
+            logout("not Down")
+
     def win_loop(self):
-        self.win.mainloop()
         logout("loop...ok")
+        self.win.mainloop()
     
-    def win_text(self):
-        pass
+    def win_text(self, text):
+        text_label = Label(self.win)
+        text_label.config(text=text)
+        text_label.pack()
+
+class RUN():
+    def __init__(self) -> None:
+        self.read = READ()
+        self.win = WIN()
+    
+    def run(self):
+        self.win.win_loop()
+
 
 if __name__ == "__main__":
     logout("start...")
 
-    read = READ()
-    read.read_count()
     logout(str(DEBUG)+str(JSONPATH)+str(COUNTINI)+str(count)+str(read_line))
 
-    win = WIN()
-    win.win_loop()
-
-
-    logout("end...")
+    app = RUN()
+    app.run()
+    
     exit()
