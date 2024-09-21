@@ -1,0 +1,5 @@
+[14:23:57] read json ok
+[14:23:57] {'DEBUG': True, 'count': {'myname': '我', 'laowang': '???'}, 'root': ['laowang:你还好吗？', 'myname:这是哪？', 'laowang:这在医院，对了！你叫什么？', {'input': {'text': '你的名字', 'run': {'count': {'myname': 'input'}}}}, 'myname:我叫{myname}。', {'button': {'num': 1, 'text': ['你的名字呢？'], 'run': {'text': 'laowang:我叫老王。', 'run': {'count': {'laowang': '老王'}}}}}, {'bigtext': '完'}, 'end']}
+[14:23:57] init...ok
+[14:23:57] loop...ok
+[14:24:04] exit

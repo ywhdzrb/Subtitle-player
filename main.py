@@ -4,7 +4,6 @@ from tkinter import messagebox
 
 DEBUG = None
 JSONPATH = ".\\tloos.json"
-COUNTINI = ".\\count.ini"
 json_count = None
 read_line = 0
 
@@ -12,17 +11,12 @@ def logout(text) -> None:
     if DEBUG:
         import time
         print(f"[{time.strftime('%H:%M:%S', time.localtime())}] {text}")
-        with open(".\\log.log", "a") as f:
+        with open(".\\log.log", "a", encoding="UTF-8") as f:
             f.write(f"[{time.strftime('%H:%M:%S', time.localtime())}] {text}\n")
 
 def exit() -> None:
     import sys
-    with open(COUNTINI, "w", encoding="UTF-8") as f:
-        f.write(str(DEBUG)+"\n")
-        f.write(str(JSONPATH)+"\n")
-        f.write(str(COUNTINI)+"\n")
-        f.write(str(json_count)+"\n")
-        f.write(str(read_line)+"\n")
+    logout("exit")
     sys.exit()       
 
 class READ:
@@ -30,41 +24,18 @@ class READ:
         self.read_root_line = read_line
         with open(JSONPATH, "r", encoding="UTF-8") as f:
             self.data = json.load(f)
-            self.read_json_count_and_DEBUG()
-            self.read_count()
+            self.read_DEBUG()
+            self.read_json_count()
             logout("read json ok")
             logout(self.data)
     
-    def read_count(self) -> None:
-        global DEBUG, JSONPATH, COUNTINI, json_count, read_line
-        with open(COUNTINI, "r", encoding="UTF-8") as f:
-            DEBUG = bool(f.readline())
-            JSONPATH = str(f.readline())
-            COUNTINI = str(f.readline())
-            json_count = dict(f.readline())
-            read_line = int(f.readline())
-            logout("count...ok")
+    def read_DEBUG(self) -> None:
+        global DEBUG
+        DEBUG = self.data["DEBUG"]
     
-    def read_json_count_and_DEBUG(self) -> None:
-        json_count = self.data["count"]
-        with open(COUNTINI, "r", encoding="UTF-8") as f:
-            JSONPATH = f.readline()
-            COUNTINI = f.readline()
-            read_line = f.readline()
-        
-        with open(JSONPATH, "r", encoding="UTF-8") as f:
-            json_count = json.load(f)["count"]
-            logout(json_count)
-            DEBUG = json_count["DEBUG"]
+    def read_json_count(self) -> dict:
+        return self.data["count"]
 
-        with open(COUNTINI, "w") as f:
-            f.write(str(DEBUG)+"\n")
-            f.write(str(JSONPATH)+"\n")
-            f.write(str(COUNTINI)+"\n")
-            f.write(str(json_count)+"\n")
-            f.write(str(read_line)+"\n")
-        logout(json_count, DEBUG)
-    
     def read_text(self) -> str:
         if type(self.data["root"][self.read_root_line]) == str:
             return self.data["root"][self.read_root_line]
@@ -113,6 +84,12 @@ class WIN:
         self.button_home = Button(self.win, text="home", command= lambda: self.win_button_home())
         self.button_home.place(x=10, y=10)
 
+        # 显示 read_line
+        global read_line
+        self.win_text_read_line = Label(self.win)
+        self.win_text_read_line.config(text=f"line : {read_line + 1}")
+        self.win_text_read_line.place(x=180, y=15)
+ 
         self.read = READ()
 
         logout("init...ok")
@@ -126,6 +103,7 @@ class WIN:
         else:
             messagebox.showinfo("提示", "已经是第一行了！")
             logout("not UP")
+        self.win_text_read_line.config(text=f"line : {read_line + 1}")
     
     def win_button_down(self) -> None:
         global read_line
@@ -136,7 +114,8 @@ class WIN:
         else:
             messagebox.showinfo("提示", "已经是最后一行了！")
             logout("not Down")
-    
+        self.win_text_read_line.config(text=f"line : {read_line + 1}")
+
     def win_button_home(self) -> None:
         logout("start home")
         home = Tk()
@@ -166,12 +145,6 @@ class WIN:
         if not json_path == JSONPATH:
             read_line = 0
         JSONPATH = json_path
-        with open(COUNTINI, "w", encoding="UTF-8") as f:
-            f.write(str(DEBUG)+"\n")
-            f.write(str(JSONPATH)+"\n")
-            f.write(str(COUNTINI)+"\n")
-            f.write(str(json_count)+"\n")
-            f.write(str(read_line)+"\n")
         RUN().run()
 
     def win_loop(self) -> None:
@@ -181,16 +154,30 @@ class WIN:
     
     def win_text(self, text:list) -> None:
         text_label = Label(self.win)
-        text_label.config(text=text[0])
+        text_label.config(text=text[1])
         text_label.place(x=10, y=50)
         name_label = Label(self.win)
-        name_label.config(text=text[1]+":")
+        if text[0] in json_count:
+            name_label.config(text=json_count[text[0]])
+        else:
+            name_label.config(text=text[0])
         name_label.place(x=10, y=70)
         logout(text)
 
-    def win_run(self, run) -> None:
-        if run in "count":
-            pass
+    def win_run(self, run:dict) -> None:
+        if "count" in run:
+            for i, value in run["count"]:
+                logout(value)
+                if i in json_count:
+                    json_count[i] = run["count"][i]
+                    logout(f"count {i} = {run['count'][i]}")
+
+        if "text" in run:
+            self.win_text(run["text"])
+        
+        if "run" in run:
+            self.win_run(run["run"])
+                        
     
     def win_button(self, button) -> None:
         self.button_down.destroy()
@@ -209,7 +196,6 @@ class WIN:
 
 class RUN():
     def __init__(self) -> None:
-        self.read = READ()
         self.win = WIN()
     
     def run(self) -> None:
@@ -219,7 +205,7 @@ class RUN():
 if __name__ == "__main__":
     logout("start...")
 
-    logout(str(DEBUG)+str(JSONPATH)+str(COUNTINI)+str(json_count)+str(read_line))
+    logout(str(DEBUG)+str(JSONPATH)+str(json_count)+str(read_line))
 
     app = RUN()
     app.run()

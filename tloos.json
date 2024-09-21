@@ -1,6 +1,6 @@
 {
+    "DEBUG":true,
     "count":{
-        "DEBUG":true,
         "myname":"我",
         "laowang":"???"
     },
@@ -25,13 +25,11 @@
                 "text":[
                     "你的名字呢？"
                 ],
-                "commnd":{
+                "run":{
+                    "text":"laowang:我叫老王。",
                     "run":{
-                        "looptext":"我叫老王。",
-                        "run":{
-                            "count":{
-                                "myname":"老王"
-                            }
+                        "count":{
+                            "laowang":"老王"
                         }
                     }
                 }
