@@ -171,28 +171,48 @@ class WIN:
                 if i in json_count:
                     json_count[i] = run["count"][i]
                     logout(f"count {i} = {run['count'][i]}")
-
-        if "text" in run:
-            self.win_text(run["text"])
+                if value == "input":
+                    json_count[i] = self.my_input
+                    logout(f"count:{json_count[i]} = {self.my_input}")
         
         if "run" in run:
             self.win_run(run["run"])
-                        
-    
-    def win_button(self, button) -> None:
-        self.button_down.destroy()
-        self.button_up.destroy()
-        self.button_home.destroy()
+        
+        if "text" in run:
+            self.win_text(run["text"].split(":"))
+
+    def win_button_click(self, button:dict) -> None:
+        if "run" in button:
+            self.win_run(button["run"])
+        self.my_button1.destroy()
+        self.my_button2.destroy()
+        self.my_button3.destroy()
+
+    def win_button(self, button:dict) -> None:
+        self.my_button1 = Button(self.win, text=button["text"][0], command=lambda: self.win_button_click(button))
+        self.my_button2 = Button(self.win, text=button["text"][1], command=lambda: self.win_button_click(button))
+        self.my_button3 = Button(self.win, text=button["text"][2], command=lambda: self.win_button_click(button))
         if button["num"] == 1:
-            logout("button1")
-            button1 = Button(self.win, text=button["text"][0], command=lambda:self.win_run(button["run"]))
-            button1.pack(fill=X)
+            self.my_button1.pack(fill="x")
         if button["num"] == 2:
-            logout("button2")
-            button1 = Button(self.win, text=button["text"][0], command=lambda:self.win_run(button["run"]))
-            button1.pack(fill=X)
-            button2 = Button(self.win, text=button["text"][1], command=lambda:self.win_run(button["run"]))
-            button2.pack(fill=X)
+            self.my_button1.pack(fill="x")
+            self.my_button2.pack(fill="x")
+        if button["num"] == 3:
+            self.my_button1.pack(fill="x")
+            self.my_button2.pack(fill="x")
+            self.my_button3.pack(fill="x")
+
+    def win_input_click(self, input:Entry) -> None:
+        logout(input.get())
+        if "run" in input:
+            self.win_run(input["run"])
+
+    def win_input(self, input:dict) -> None:
+        Label(self.win, text=input["text"]).pack(fill="x")
+        self.my_input = Entry(self.win)
+        self.my_input.pack(fill="x")
+        self.my_button = Button(self.win, text="ok", command=lambda: self.win_input_click(input))
+        
 
 class RUN():
     def __init__(self) -> None:

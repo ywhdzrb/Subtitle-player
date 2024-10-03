@@ -10,7 +10,7 @@
         "laowang:这在医院，对了！你叫什么？",
         {
             "input":{
-                "text":"你的名字",
+                "text":"你的名字:",
                 "run":{
                     "count":{
                         "myname":"input"
@@ -23,7 +23,9 @@
             "button":{
                 "num":1,
                 "text":[
-                    "你的名字呢？"
+                    "你的名字呢？",
+                    "",
+                    ""
                 ],
                 "run":{
                     "text":"laowang:我叫老王。",
